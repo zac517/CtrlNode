@@ -11,16 +11,11 @@ public:
 };
 
 class COMMLibrary {
-private:
-    COMMLibrary() {}; // 私有构造函数
-    static COMMLibrary* instance;
-
 public:
-    static COMMLibrary* getInstance();
-    bool init(const char* deviceName, void (*cb)(const String&, const String&));
-    bool sendMessage(const String& message, const String& via);  // 返回发送状态
+    void init(const char* deviceName, void (*cb)(const String&, const String&));
+    void sendMessage(const String& message, const String& via);  // 返回发送状态
 };
 
-extern COMMLibrary* COMM;
+extern COMMLibrary COMM;
 
 #endif

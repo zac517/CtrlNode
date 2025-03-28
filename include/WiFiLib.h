@@ -5,18 +5,12 @@
 #include <WiFi.h>
 
 class WiFiLibrary {
-private:
-    WiFiLibrary(); // 私有构造函数，防止外部直接创建
-    static WiFiLibrary* instance;
-
-public:
-    static WiFiLibrary* getInstance(); // 单例访问方法
-    
+public: 
     void connect(const String& ssid, const String& password);
     void disconnect();
     bool isConnected();
 };
 
-extern WiFiLibrary* WiFiLib; // 声明为指针
+extern WiFiLibrary WiFiLib;
 
 #endif

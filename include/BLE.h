@@ -10,8 +10,8 @@
 class BLELibrary {
 public:
     const char* deviceId;
-    bool init(const char* deviceName, BLECharacteristicCallbacks* callbacks);
-    bool sendMessage(const String& message);
+    void init(const char* deviceName, BLECharacteristicCallbacks* callbacks);
+    void sendMessage(const String& message);
 };
 
 extern BLELibrary BLE;

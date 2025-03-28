@@ -25,7 +25,7 @@ public:
     }
 };
 
-bool BLELibrary::init(const char* deviceName, BLECharacteristicCallbacks* callbacks) {
+void BLELibrary::init(const char* deviceName, BLECharacteristicCallbacks* callbacks) {
     BLEDevice::init(deviceName);
     pServer = BLEDevice::createServer();
     pServer->setCallbacks(new MyServerCallbacks());
@@ -55,16 +55,14 @@ bool BLELibrary::init(const char* deviceName, BLECharacteristicCallbacks* callba
     Serial.print("蓝牙MAC地址: ");
     Serial.println(deviceId);
     pWriteCharacteristic->setCallbacks(callbacks);
-    return true;
 }
 
-bool BLELibrary::sendMessage(const String& message) {
+void BLELibrary::sendMessage(const String& message) {
     if (ble_connected) {
         pNotifyCharacteristic->setValue(message.c_str());
         pNotifyCharacteristic->notify();
-        Serial.println("通过BLE发送: " + message);
+        Serial.println("通过 BLE 发送: " + message);
     }
-    return true;
 }
 
 BLELibrary BLE;

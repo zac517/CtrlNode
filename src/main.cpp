@@ -29,7 +29,6 @@ String password = "";
 int mode = 0;
 int brightness = 0;
 int color = 0;
-
 String temp_ssid = "";
 String temp_password = "";
 
@@ -40,17 +39,17 @@ void sendDeviceState(const String& via) {
     String colorMessage = "{\"color\": " + String(color) + "}";
     String wifiMessage = "{\"wifi\": \"" + wifi_state + "\"}";
 
-    COMM->sendMessage(powerMessage, via);
-    COMM->sendMessage(modeMessage, via);
-    COMM->sendMessage(brightnessMessage, via);
-    COMM->sendMessage(colorMessage, via);
-    COMM->sendMessage(wifiMessage, via);
+    COMM.sendMessage(powerMessage, via);
+    COMM.sendMessage(modeMessage, via);
+    COMM.sendMessage(brightnessMessage, via);
+    COMM.sendMessage(colorMessage, via);
+    COMM.sendMessage(wifiMessage, via);
     if (wifi_state == "on") {
-        COMM->sendMessage("{\"wifi\": \"" + String(WiFiLib->isConnected() ? "true" : "false") + "\"}", via);
+        COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
     }
 }
 
-// 根据亮度和色温设置两个灯的PWM占空比
+// 根据亮度和色温设置两个灯的 PWM 占空比
 void setLightsBrightness(int brightness, int color) {
     int warm, cool;
     int max_ratio = max(color, 100 - color);
@@ -69,7 +68,7 @@ void setLightsBrightness(int brightness, int color) {
     ledcWrite(PWM_CHANNEL_2, cool_pwm);
 }
 
-// 保存配置到Preferences
+// 保存配置到 Preferences
 void saveConfig() {
     prefs.begin("config", false);
     prefs.putString(stored_power, power_state);
@@ -83,7 +82,7 @@ void saveConfig() {
     Serial.println("配置已保存");
 }
 
-// 从Preferences加载配置
+// 从 Preferences 加载配置
 void loadConfig() {
     prefs.begin("config", true);
     power_state = prefs.getString(stored_power, "off");  // 默认"off"
@@ -107,52 +106,44 @@ void handleReceivedMessage(const String& message, const String& via) {
 
     if (!doc["power"].isNull()) {
         power_state = String(doc["power"].as<const char*>());
-        Serial.println("通过" + via + "设置电源状态为 " + power_state);
         if (power_state == "on") setLightsBrightness(brightness, color);
         else setLightsBrightness(0, 0);    
     } else if (!doc["mode"].isNull()) {
         mode = doc["mode"].as<int>();
-        Serial.println("通过" + via + "设置模式为 " + String(mode));
     } else if (!doc["bn"].isNull()) {
         brightness = doc["bn"].as<int>();
-        Serial.println("通过" + via + "设置亮度为 " + String(brightness));
         setLightsBrightness(brightness, color);
     } else if (!doc["color"].isNull()) {
         color = doc["color"].as<int>();
-        Serial.println("通过" + via + "设置色温为 " + String(color));
         setLightsBrightness(brightness, color);
     } else if (!doc["wifi"].isNull()) {
         String wifi_command = String(doc["wifi"].as<const char*>());
-        Serial.println("通过" + via + "接收到WiFi命令: " + wifi_command);
         if (wifi_command == "on") {
             wifi_state = "on";
-            WiFiLib->connect(ssid, password);
-            COMM->sendMessage("{\"wifi\": \"" + String(WiFiLib->isConnected() ? "true" : "false") + "\"}", via);
+            WiFiLib.connect(ssid, password);
+            COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
         } else if (wifi_command == "off") {
             wifi_state = "off";
-            WiFiLib->disconnect();
+            WiFiLib.disconnect();
         }
     } else if (!doc["ssid"].isNull()) {
         temp_ssid = String(doc["ssid"].as<const char*>());
-        Serial.println("通过" + via + "接收到WiFi名称: " + temp_ssid);
     } else if (!doc["pw"].isNull()) {
         temp_password = String(doc["pw"].as<const char*>());
-        Serial.println("通过" + via + "接收到WiFi密码: " + temp_password);
     } else if (!doc["type"].isNull()) {
         String type = String(doc["type"].as<const char*>());
         if (type == "try") {
             if (temp_ssid.length() > 0 && temp_password.length() > 0) {
-                Serial.println("尝试连接WiFi: " + temp_ssid);
-                WiFiLib->connect(temp_ssid, temp_password);
-                if (WiFiLib->isConnected()) {
+                WiFiLib.connect(temp_ssid, temp_password);
+                if (WiFiLib.isConnected()) {
                     ssid = temp_ssid;
                     password = temp_password;
                     wifi_state = "on";
                 }
-                COMM->sendMessage("{\"wifi\": \"" + String(WiFiLib->isConnected() ? "true" : "false") + "\"}", via);
+                COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
             } else {
                 Serial.println("未提供临时WiFi凭证");
-                COMM->sendMessage("{\"wifi\": \"" + String(WiFiLib->isConnected() ? "true" : "false") + "\"}", via);
+                COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
             }
         } else if (type == "get") {
             sendDeviceState(via);
@@ -186,16 +177,12 @@ void setup() {
     
     loadConfig();
     printConfig();
-    Serial.println("开始初始化...");
-
-    WiFiLib = WiFiLibrary::getInstance();
-    COMM = COMMLibrary::getInstance();
 
     if (power_state == "on") setLightsBrightness(brightness, color);
     else setLightsBrightness(0, 0);
-    if (wifi_state == "on") WiFiLib->connect(ssid, password);
+    if (wifi_state == "on") WiFiLib.connect(ssid, password);
 
-    COMM->init("Lumina 台灯", handleReceivedMessage);
+    COMM.init("Lumina 台灯", handleReceivedMessage);
 }
 
 void loop() {
