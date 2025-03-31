@@ -18,7 +18,7 @@ void WiFiLibrary::connect(const String& ssid, const String& password) {
         }
         delay(500);
     }
-    Serial.println("\nWiFi已连接，IP地址: " + WiFi.localIP().toString());
+    Serial.println("WiFi已连接，IP地址: " + WiFi.localIP().toString());
 }
 
 

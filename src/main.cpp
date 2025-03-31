@@ -139,6 +139,12 @@ void handleReceivedMessage(const String& message, const String& via) {
                     ssid = temp_ssid;
                     password = temp_password;
                     wifi_state = "on";
+                    COMM.sendMessage("{\"wifi\": \"true\"}", via);
+                }
+                else {
+                    WiFiLib.connect(ssid, password);
+                    COMM.sendMessage("{\"wifi\": \"false\"}", via);
+                    Serial.println("WiFi连接失败，恢复原始凭证");
                 }
                 COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
             } else {

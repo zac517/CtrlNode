@@ -9,7 +9,7 @@
 
 class BLELibrary {
 public:
-    const char* deviceId;
+    String deviceId;
     void init(const char* deviceName, BLECharacteristicCallbacks* callbacks);
     void sendMessage(const String& message);
 };

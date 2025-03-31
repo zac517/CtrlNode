@@ -10,14 +10,12 @@ void mqttTask(void* pvParameters) {
             if (!client.connected()) {
                 String clientId = "ESP32Client-" + String(random(0xffff), HEX);
                 Serial.println("尝试 MQTT 连接...");
-                if (client.connect(clientId.c_str())) {
-                    client.subscribe((topic + "/control").c_str());
+                if (client.connect(clientId.c_str()) && client.subscribe((topic + "/control").c_str())) {
                     Serial.println("MQTT 已连接");
                 } else {
                     Serial.print("失败，rc=");
                     Serial.println(client.state());
                 }
-                client.subscribe((topic + "/control").c_str());
             }
             client.loop();
         }
@@ -36,6 +34,15 @@ void MQTTLibrary::init(const char* server, int port, const String& deviceId, MQT
 }
 
 void MQTTLibrary::sendMessage(const String& message) {
+    if (!client.connected()) {
+        String clientId = "ESP32Client-" + String(random(0xffff), HEX);
+        if (client.connect(clientId.c_str()) && client.subscribe((topic + "/control").c_str())) {
+            Serial.println("MQTT 已连接");
+        } else {
+            Serial.print("失败，rc=");
+            Serial.println(client.state());
+        }
+    }
     client.publish((topic + "/state").c_str(), message.c_str());
     Serial.println("通过 MQTT 发送: " + message);
 }

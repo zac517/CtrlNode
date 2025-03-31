@@ -1,5 +1,4 @@
 ## 简单使用
-1. 库管理：搜索安装 `PubSubClient` 和 `ArduinoJson` 。
-2. 开发板管理器：搜索安装 `esp32` 。
-3. 选择开发板 `ESP32 Dev Module` 。
-4. 工具 -> Partition Scheme：设置为 `Huge APP` 。
+1. VScode -> 扩展：搜索安装 `PlatformIO` 。
+2. 将本项目代码克隆到本地 。
+3. 运行 `PlatformIO: Build` 自动补全所需依赖。
