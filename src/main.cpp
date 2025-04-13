@@ -95,6 +95,17 @@ void loadConfig() {
     prefs.end();
 }
 
+void printConfig() {
+    Serial.println("加载的配置:");
+    Serial.println("电源状态: " + power_state);
+    Serial.println("WiFi状态: " + wifi_state);
+    Serial.println("WiFi名称: " + ssid);
+    Serial.println("WiFi密码: " + password);
+    Serial.println("模式: " + String(mode));
+    Serial.println("亮度: " + String(brightness));
+    Serial.println("色温: " + String(color));
+}
+
 void handleReceivedMessage(const String& message, const String& via) {
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, message);
@@ -157,17 +168,6 @@ void handleReceivedMessage(const String& message, const String& via) {
     }
 
     saveConfig();
-}
-
-void printConfig() {
-    Serial.println("加载的配置:");
-    Serial.println("电源状态: " + power_state);
-    Serial.println("WiFi状态: " + wifi_state);
-    Serial.println("WiFi名称: " + ssid);
-    Serial.println("WiFi密码: " + password);
-    Serial.println("模式: " + String(mode));
-    Serial.println("亮度: " + String(brightness));
-    Serial.println("色温: " + String(color));
 }
 
 void setup() {
