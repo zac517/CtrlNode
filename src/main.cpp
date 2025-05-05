@@ -32,20 +32,20 @@ int color = 0;
 String temp_ssid = "";
 String temp_password = "";
 
-void sendDeviceState(const String& via) {
+void sendDeviceState() {
     String powerMessage = "{\"power\": \"" + power_state + "\"}";
     String modeMessage = "{\"mode\": " + String(mode) + "}";
     String brightnessMessage = "{\"bn\": " + String(brightness) + "}";
     String colorMessage = "{\"color\": " + String(color) + "}";
     String wifiMessage = "{\"wifi\": \"" + wifi_state + "\"}";
 
-    COMM.sendMessage(powerMessage, via);
-    COMM.sendMessage(modeMessage, via);
-    COMM.sendMessage(brightnessMessage, via);
-    COMM.sendMessage(colorMessage, via);
-    COMM.sendMessage(wifiMessage, via);
+    COMM.sendMessage(powerMessage);
+    COMM.sendMessage(modeMessage);
+    COMM.sendMessage(brightnessMessage);
+    COMM.sendMessage(colorMessage);
+    COMM.sendMessage(wifiMessage);
     if (wifi_state == "on") {
-        COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
+        COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}");
     }
 }
 
@@ -106,7 +106,29 @@ void printConfig() {
     Serial.println("色温: " + String(color));
 }
 
-void handleReceivedMessage(const String& message, const String& via) {
+// 根据模式设置亮度和色温
+void setMode(int new_mode) {
+    switch (new_mode) {
+        case 0: // 均衡
+            brightness = 70;
+            color = 50;
+            break;
+        case 1: // 夜间
+            brightness = 20;
+            color = 80;
+            break;
+        case 2: // 专注
+            brightness = 90;
+            color = 20;
+            break;
+        default:
+            break;
+    }
+    setLightsBrightness(brightness, color);
+    saveConfig();
+}
+
+void handleReceivedMessage(const String& message) {
     JsonDocument doc;
     DeserializationError error = deserializeJson(doc, message);
     if (error) {
@@ -120,7 +142,11 @@ void handleReceivedMessage(const String& message, const String& via) {
         if (power_state == "on") setLightsBrightness(brightness, color);
         else setLightsBrightness(0, 0);    
     } else if (!doc["mode"].isNull()) {
-        mode = doc["mode"].as<int>();
+        int new_mode = doc["mode"].as<int>();
+        if (new_mode >= 0 && new_mode <= 2) {
+            setMode(new_mode);
+            mode = new_mode;
+        }
     } else if (!doc["bn"].isNull()) {
         brightness = doc["bn"].as<int>();
         setLightsBrightness(brightness, color);
@@ -132,7 +158,7 @@ void handleReceivedMessage(const String& message, const String& via) {
         if (wifi_command == "on") {
             wifi_state = "on";
             WiFiLib.connect(ssid, password);
-            COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
+            COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}");
         } else if (wifi_command == "off") {
             wifi_state = "off";
             WiFiLib.disconnect();
@@ -150,20 +176,20 @@ void handleReceivedMessage(const String& message, const String& via) {
                     ssid = temp_ssid;
                     password = temp_password;
                     wifi_state = "on";
-                    COMM.sendMessage("{\"wifi\": \"true\"}", via);
+                    COMM.sendMessage("{\"wifi\": \"true\"}");
                 }
                 else {
                     WiFiLib.connect(ssid, password);
-                    COMM.sendMessage("{\"wifi\": \"false\"}", via);
+                    COMM.sendMessage("{\"wifi\": \"false\"}");
                     Serial.println("WiFi连接失败，恢复原始凭证");
                 }
-                COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
+                COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}");
             } else {
                 Serial.println("未提供临时WiFi凭证");
-                COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}", via);
+                COMM.sendMessage("{\"wifi\": \"" + String(WiFiLib.isConnected() ? "true" : "false") + "\"}");
             }
         } else if (type == "get") {
-            sendDeviceState(via);
+            sendDeviceState();
         }
     }
 
@@ -207,4 +233,4 @@ void loop() {
         lastMillis = millis();
         esp_task_wdt_reset();
     }
-}
+}    

@@ -7,11 +7,19 @@
 #include <BLEServer.h>
 #include <BLE2902.h>
 
-class BLELibrary {
+class MyCallbacks : public BLECharacteristicCallbacks
+{
+public:
+    void onWrite(BLECharacteristic *pCharacteristic) override;
+};
+
+class BLELibrary
+{
 public:
     String deviceId;
-    void init(const char* deviceName, BLECharacteristicCallbacks* callbacks);
-    void sendMessage(const String& message);
+    void init(const char *deviceName, void (*callback)(const String &));
+    void sendMessage(const String &message);
+    bool isConnected();
 };
 
 extern BLELibrary BLE;

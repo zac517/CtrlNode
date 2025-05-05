@@ -5,15 +5,10 @@
 #include "BLE.h"
 #include "MQTT.h"
 
-class MyCallbacks : public BLECharacteristicCallbacks {
-public:
-    void onWrite(BLECharacteristic *pCharacteristic) override;
-};
-
 class COMMLibrary {
 public:
-    void init(const char* deviceName, void (*cb)(const String&, const String&));
-    void sendMessage(const String& message, const String& via);  // 返回发送状态
+    void init(const char* deviceName, void (*callback)(const String&));
+    void sendMessage(const String& message);
 };
 
 extern COMMLibrary COMM;

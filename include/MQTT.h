@@ -8,8 +8,9 @@
 
 class MQTTLibrary {
 public:
-    void init(const char* server, int port, const String& clientId, MQTT_CALLBACK_SIGNATURE);
+    void init(const String& clientId, void (*callback)(const String &));
     void sendMessage(const String& message);
+    bool isConnected();
 };
 
 extern MQTTLibrary MQTT;
